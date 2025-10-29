@@ -282,6 +282,11 @@ def index():
     """Serve the main conversation interface (default)"""
     return render_template('main.html')
 
+@app.route('/healthz')
+def healthz():
+    """Health check endpoint for deployment platforms"""
+    return jsonify({"status": "healthy", "service": "BDH"}), 200
+
 @app.route('/lab')
 def lab():
     """Serve the Interactive Lab interface"""
