@@ -1,0 +1,16 @@
+# Environment variables
+.env
+
+# Data files
+input.txt
+input*.txt
+
+# Python
+__pycache__/
+*.py[cod]
+*.pt
+*.pth
+
+# IDEs
+.vscode/
+.idea/

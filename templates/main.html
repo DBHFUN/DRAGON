@@ -1,0 +1,2148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BDH Training Interface</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            background: #0D0D0D;
+            color: #ECECEC;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Background */
+        .video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .video-background video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            z-index: 1;
+        }
+
+        /* Main Container */
+        .container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            height: 100vh;
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            grid-template-rows: auto auto 1fr auto;
+            padding: 0;
+            margin: 0;
+        }
+
+        .top-nav {
+            grid-column: 1 / -1;
+            grid-row: 1;
+        }
+
+        .header {
+            grid-column: 1 / 2;
+            grid-row: 2;
+        }
+
+        .messages {
+            grid-column: 1 / 2;
+            grid-row: 3;
+        }
+
+        .input-area {
+            grid-column: 1 / 2;
+            grid-row: 4;
+        }
+
+        .right-sidebar {
+            grid-column: 2 / 3;
+            grid-row: 2 / -1;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .right-sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .right-sidebar::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .right-sidebar::-webkit-scrollbar-thumb {
+            background: rgba(34, 197, 94, 0.4);
+            border-radius: 3px;
+        }
+
+        .right-sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(34, 197, 94, 0.6);
+        }
+
+        /* Top Navigation */
+        .top-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 32px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #ECECEC;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            object-fit: contain;
+            background: #000000;
+            border: 1px solid rgba(34, 197, 94, 0.35);
+            padding: 5px;
+            box-shadow: 0 12px 24px rgba(34, 197, 94, 0.12);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: #8E8E93;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            transition: color 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .nav-link:hover {
+            color: #ECECEC;
+        }
+
+        .nav-link svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Header */
+        .header {
+            padding: 20px 32px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+            width: 100%;
+        }
+
+        .header h1 {
+            font-size: 16px;
+            font-weight: 600;
+            color: #ECECEC;
+            letter-spacing: -0.01em;
+        }
+
+        .header p {
+            font-size: 13px;
+            color: #8E8E93;
+            margin-top: 4px;
+        }
+
+        .template-bar {
+            margin-top: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .template-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .template-button {
+            padding: 10px 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            background: rgba(255, 255, 255, 0.05);
+            color: #86efac;
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.02em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .template-button:hover {
+            background: rgba(34, 197, 94, 0.14);
+            border-color: rgba(34, 197, 94, 0.45);
+        }
+
+        .template-button span {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        .info-button {
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            background: rgba(15, 23, 42, 0.6);
+            color: #Cbd5f5;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .info-button:hover {
+            background: rgba(148, 163, 184, 0.2);
+        }
+
+        .info-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(3, 7, 18, 0.65);
+            backdrop-filter: blur(10px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+            padding: 24px;
+        }
+
+        .info-overlay.active {
+            display: flex;
+        }
+
+        .info-card {
+            width: min(520px, 100%);
+            background: linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(15, 23, 42, 0.75));
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            border-radius: 18px;
+            padding: 24px;
+            color: #E2E8F0;
+            box-shadow: 0 32px 60px rgba(2, 6, 23, 0.45);
+            position: relative;
+        }
+
+        .info-card h3 {
+            font-size: 18px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .info-card p {
+            font-size: 14px;
+            color: #94A3B8;
+            margin-bottom: 14px;
+        }
+
+        .info-card ol {
+            padding-left: 18px;
+            margin: 0 0 16px 0;
+            font-size: 13px;
+            color: #Cbd5f5;
+            line-height: 1.6;
+        }
+
+        .info-card li {
+            margin-bottom: 8px;
+        }
+
+        .info-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(148, 163, 184, 0.12);
+            color: #E2E8F0;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .info-close:hover {
+            background: rgba(148, 163, 184, 0.28);
+        }
+
+        /* Chat Messages */
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            width: 100%;
+        }
+
+        .messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .messages::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .messages::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        .message {
+            display: flex;
+            gap: 16px;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            overflow: hidden;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            background: #000000;
+        }
+
+        .message-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #000000;
+        }
+
+        .avatar-initial {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            color: #f8fafc;
+            background: linear-gradient(135deg, #19C37D 0%, #15A869 100%);
+        }
+
+        .message.user .message-avatar {
+            border: none;
+            background: transparent;
+        }
+
+        .message.assistant .message-avatar {
+            border-color: rgba(96, 165, 250, 0.45);
+        }
+
+        .message.bdh .message-avatar {
+            border-color: rgba(34, 197, 94, 0.35);
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        .message-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .message-role {
+            font-size: 13px;
+            font-weight: 600;
+            color: #8E8E93;
+            margin-bottom: 6px;
+        }
+
+        .message-text {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #ECECEC;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .message.bdh .message-text {
+            font-family: 'SF Mono', 'Monaco', 'Courier New', monospace;
+            background: rgba(167, 112, 239, 0.08);
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 2px solid #A770EF;
+        }
+
+        .bdh-learning-terminal {
+            font-family: 'Courier New', monospace;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            color: #86efac;
+            font-size: 13px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .bdh-learning-terminal .terminal-line {
+            opacity: 0;
+            animation: terminalFadeIn 0.3s ease-out forwards;
+        }
+
+        @keyframes terminalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .bdh-learning-terminal .terminal-prompt {
+            color: #22c55e;
+            font-weight: bold;
+        }
+
+        .bdh-learning-terminal .terminal-success {
+            color: #86efac;
+        }
+
+        .bdh-learning-terminal .terminal-info {
+            color: #60a5fa;
+        }
+
+        .bdh-learning-terminal .terminal-cursor {
+            display: inline-block;
+            width: 8px;
+            height: 14px;
+            background: #22c55e;
+            animation: blink 1s step-end infinite;
+            margin-left: 2px;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        .thinking-dots {
+            animation: thinking 1.5s ease-in-out infinite;
+        }
+
+        @keyframes thinking {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* Page Loader */
+        .page-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            transition: opacity 0.5s ease-out, visibility 0.5s ease-out;
+        }
+
+        .page-loader.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loader-logo {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 30px;
+            animation: logoFloat 2s ease-in-out infinite;
+        }
+
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .loader-terminal {
+            font-family: 'Courier New', monospace;
+            color: #22c55e;
+            font-size: 14px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .loader-bar-container {
+            width: 400px;
+            max-width: 80vw;
+            height: 30px;
+            background: rgba(34, 197, 94, 0.1);
+            border: 2px solid #22c55e;
+            border-radius: 4px;
+            padding: 4px;
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+        }
+
+        .loader-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, 
+                #22c55e 0%, 
+                #86efac 50%, 
+                #22c55e 100%);
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.3s ease-out;
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.6);
+            animation: barGlow 1.5s ease-in-out infinite;
+        }
+
+        @keyframes barGlow {
+            0%, 100% { box-shadow: 0 0 10px rgba(34, 197, 94, 0.6); }
+            50% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.9); }
+        }
+
+        .loader-percentage {
+            font-family: 'Courier New', monospace;
+            color: #86efac;
+            font-size: 18px;
+            margin-top: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .bdh-final-response {
+            background: rgba(34, 197, 94, 0.1);
+            border-left: 3px solid #22c55e;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 8px;
+            color: #ECECEC;
+        }
+
+        .loading-subtitle {
+            font-size: 13px;
+            opacity: 0.7;
+            margin-bottom: 6px;
+        }
+
+        /* Input Area */
+        .input-area {
+            padding: 16px 32px 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(20px);
+            width: 100%;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 12px 16px;
+            transition: all 0.2s ease;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .input-wrapper textarea {
+            flex: 1;
+            background: none;
+            border: none;
+            outline: none;
+            color: #ECECEC;
+            font-size: 15px;
+            font-family: inherit;
+            resize: none;
+            min-height: 24px;
+            max-height: 200px;
+        }
+
+        .input-wrapper textarea::placeholder {
+            color: #8E8E93;
+        }
+
+        .send-button {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: #8E8E93;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .send-button:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.15);
+            color: #ECECEC;
+        }
+
+        .send-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .send-button svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Status Indicator */
+        .status {
+            position: absolute;
+            top: 70px;
+            right: 32px;
+            padding: 6px 12px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            font-size: 12px;
+            color: #8E8E93;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            z-index: 3;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #19C37D;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-flex;
+            gap: 4px;
+            padding: 12px 0;
+        }
+
+        .loading span {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #8E8E93;
+            animation: bounce 1.4s ease-in-out infinite;
+        }
+
+        .loading span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .loading span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes bounce {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-8px);
+            }
+        }
+
+        /* Empty State */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #8E8E93;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .empty-state h2 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #ECECEC;
+            margin-bottom: 12px;
+        }
+
+        .empty-state p {
+            font-size: 15px;
+            line-height: 1.6;
+            max-width: 500px;
+        }
+
+        /* Right Sidebar - Neural Visualization */
+        .neural-section {
+            padding: 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            position: relative;
+        }
+
+        .neural-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(34, 197, 94, 0.5) 50%, 
+                transparent);
+            animation: scanline 3s linear infinite;
+            opacity: 0;
+        }
+
+        .neural-section:hover::before {
+            opacity: 1;
+        }
+
+        @keyframes scanline {
+            0% {
+                transform: translateY(0);
+            }
+            100% {
+                transform: translateY(400px);
+            }
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #8E8E93;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background: linear-gradient(90deg, #22c55e, transparent);
+            transition: width 0.3s ease;
+        }
+
+        .neural-section:hover .section-title::after {
+            width: 100%;
+        }
+
+        .neural-canvas-container {
+            width: 100%;
+            height: 320px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            overflow: hidden;
+            position: relative;
+        }
+
+        #neuralCanvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .neural-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #8E8E93;
+        }
+
+        .stat-value {
+            font-size: 13px;
+            font-weight: 600;
+            color: #86efac;
+            transition: all 0.3s ease;
+        }
+
+        .stat-value.active {
+            color: #22c55e;
+            text-shadow: 0 0 8px rgba(34, 197, 94, 0.6);
+            animation: pulse-text 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse-text {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+
+        .activity-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4ade80;
+            margin-right: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .activity-indicator.active {
+            background: #22c55e;
+            box-shadow: 0 0 12px rgba(34, 197, 94, 0.8);
+            animation: pulse-glow 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.7;
+                transform: scale(1.2);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Page Loader -->
+    <div class="page-loader" id="pageLoader">
+        <img src="https://brown-traditional-sheep-998.mypinata.cloud/ipfs/bafkreigkcpqnrvoxuckstiwkedz4sbivmliajhxhk3cysrugmftsbizple" alt="BDH Logo" class="loader-logo">
+        <div class="loader-terminal">
+            <div>$ initializing neural_network...</div>
+            <div id="loaderStatus">Loading BDH Training Interface...</div>
+        </div>
+        <div class="loader-bar-container">
+            <div class="loader-bar-fill" id="loaderBar"></div>
+        </div>
+        <div class="loader-percentage" id="loaderPercentage">0%</div>
+    </div>
+
+    <!-- Background Video -->
+    <div class="video-background">
+        <video autoplay muted loop playsinline>
+            <source src="https://brown-traditional-sheep-998.mypinata.cloud/ipfs/bafybeideydseywzyb7wso574upvbzw3prqbf3uvtw62sz2hitan4d3dpeq" type="video/mp4">
+        </video>
+    </div>
+    <div class="video-overlay"></div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Top Navigation -->
+        <nav class="top-nav">
+            <div class="nav-brand">
+                <img src="https://brown-traditional-sheep-998.mypinata.cloud/ipfs/bafkreigkcpqnrvoxuckstiwkedz4sbivmliajhxhk3cysrugmftsbizple" alt="BDH dragon logo" class="brand-logo">
+                <span>Baby Dragon Hatchling</span>
+            </div>
+            <div class="nav-links">
+                <a href="https://x.com/UseBabyDragon" target="_blank" class="nav-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    </svg>
+                    Twitter
+                </a>
+                <a href="https://github.com/DBHFUN/DRAGON" target="_blank" class="nav-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                    Our Repo
+                </a>
+                <a href="https://github.com/pathwaycom/bdh" target="_blank" class="nav-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                    Pathway Repo
+                </a>
+                <a href="#" class="nav-link">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                    Chart
+                </a>
+            </div>
+        </nav>
+
+        <!-- Header -->
+        <div class="header">
+            <h1>BDH Training Interface</h1>
+            <p>Use ChatGPT to mentor the Baby Dragon Hatchling, or @BDH to interact directly. Watch the neural lattice flare as it learns.</p>
+            <div class="template-bar">
+                <div class="template-buttons">
+                    <button class="template-button" onclick="runTemplate('style_transfer')">
+                        Neon Style Transfer
+                        <span>Cyberpunk rewrites</span>
+                    </button>
+                    <button class="template-button" onclick="runTemplate('summary')">
+                        Flash Summary
+                        <span>One-line compression</span>
+                    </button>
+                    <button class="template-button" onclick="runTemplate('data_extraction')">
+                        Signal Extraction
+                        <span>Pull key fields</span>
+                    </button>
+                </div>
+                <button class="info-button" onclick="toggleInfoPanel(true)">Teaching Guide</button>
+            </div>
+        </div>
+
+        <!-- Status -->
+        <div class="status">
+            <span class="status-dot"></span>
+            <span>Active</span>
+        </div>
+
+        <!-- Messages -->
+        <div class="messages" id="messages">
+            <div class="empty-state">
+                <div style="margin-bottom: 20px; display: flex; justify-content: center;">
+                    <img src="https://brown-traditional-sheep-998.mypinata.cloud/ipfs/bafkreigkcpqnrvoxuckstiwkedz4sbivmliajhxhk3cysrugmftsbizple" alt="Dragon logo" style="width: 80px; height: 80px; border-radius: 12px; background: #000000; border: 1px solid rgba(34, 197, 94, 0.35); padding: 10px; box-shadow: 0 12px 24px rgba(34, 197, 94, 0.12);">
+                </div>
+                <h2>Welcome to BDH Training</h2>
+                <p>Start a conversation with ChatGPT to teach BDH new skills, or use @BDH to interact with the dragon directly. Watch as it learns and responds!</p>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-area">
+            <div class="input-wrapper">
+                <textarea 
+                    id="messageInput" 
+                    placeholder="Ask GPT to teach BDH, or @BDH to call the dragon directly..."
+                    rows="1"
+                ></textarea>
+                <button class="send-button" id="sendButton" onclick="sendMessage()">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"></line>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Right Sidebar -->
+        <div class="right-sidebar">
+            <div class="neural-section">
+                <div class="section-title">Neural Activity</div>
+                <div class="neural-canvas-container">
+                    <canvas id="neuralCanvas"></canvas>
+                </div>
+                <div class="neural-stats">
+                    <div class="stat-row">
+                        <span class="stat-label">
+                            <span class="activity-indicator" id="activityIndicator"></span>
+                            Status
+                        </span>
+                        <span class="stat-value" id="statusValue">Idle</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Active Neurons</span>
+                        <span class="stat-value" id="activeNeurons">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Firing Rate</span>
+                        <span class="stat-value" id="firingRate">0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Network Architecture -->
+            <div class="neural-section" style="margin-top: 16px;">
+                <div class="section-title">Architecture</div>
+                <div class="neural-stats">
+                    <div class="stat-row">
+                        <span class="stat-label">Network Depth</span>
+                        <span class="stat-value">4 Layers</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Total Nodes</span>
+                        <span class="stat-value">28 Units</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Topology</span>
+                        <span class="stat-value">6→8→8→6</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Synapses</span>
+                        <span class="stat-value">112</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Computational Metrics -->
+            <div class="neural-section" style="margin-top: 16px;">
+                <div class="section-title">Computational</div>
+                <div class="neural-stats">
+                    <div class="stat-row">
+                        <span class="stat-label">FLOPS</span>
+                        <span class="stat-value" id="flops">0.00 GF/s</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Throughput</span>
+                        <span class="stat-value" id="throughput">0 tok/s</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Latency</span>
+                        <span class="stat-value" id="latency">0ms</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">GPU Util</span>
+                        <span class="stat-value">CPU Mode</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Memory Metrics -->
+            <div class="neural-section" style="margin-top: 16px;">
+                <div class="section-title">Memory</div>
+                <div class="neural-stats">
+                    <div class="stat-row">
+                        <span class="stat-label">Model Params</span>
+                        <span class="stat-value">2.4M</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Activation</span>
+                        <span class="stat-value">128 KB</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Gradient</span>
+                        <span class="stat-value">4.8 MB</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Cache</span>
+                        <span class="stat-value">16 MB</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Training State -->
+            <div class="neural-section" style="margin-top: 16px;">
+                <div class="section-title">Training State</div>
+                <div class="neural-stats">
+                    <div class="stat-row">
+                        <span class="stat-label">Epoch</span>
+                        <span class="stat-value" id="epoch">∞</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Loss</span>
+                        <span class="stat-value" id="loss">0.0234</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Learn Rate</span>
+                        <span class="stat-value">1e-4</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Grad Norm</span>
+                        <span class="stat-value" id="gradNorm">0.012</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Monitor -->
+            <div class="neural-section" style="margin-top: 16px;">
+                <div class="section-title">System Monitor</div>
+                <div class="neural-stats">
+                    <div class="stat-row">
+                        <span class="stat-label">Temperature</span>
+                        <span class="stat-value" id="temperature">48°C</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Power Draw</span>
+                        <span class="stat-value">12.4W</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Uptime</span>
+                        <span class="stat-value" id="uptime">00:00:00</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Clock Speed</span>
+                        <span class="stat-value">3.2 GHz</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="info-overlay" id="infoOverlay" onclick="handleOverlayClick(event)">
+        <div class="info-card">
+            <button class="info-close" onclick="toggleInfoPanel(false)">&times;</button>
+            <h3>How to teach the Dragon</h3>
+            <p>BDH only responds when explicitly called with <code>@BDH</code> or <code>@dragon</code>. ChatGPT helps structure the training.</p>
+            <ol>
+                <li><strong>Ask GPT to Teach:</strong> Say "Teach BDH to [skill]" and GPT will use <code>@BDH</code> with instructions. The dragon then learns and responds.</li>
+                <li><strong>Direct Commands:</strong> Type <code>@BDH [your request]</code> to interact with the neural model directly without GPT structuring the lesson.</li>
+                <li><strong>Templates:</strong> Use template buttons for pre-built lessons. They automatically structure the @BDH call.</li>
+                <li><strong>Watch It Learn:</strong> Green neural connections form in real-time as BDH processes. Stats update on the right panel.</li>
+            </ol>
+            <p><strong>Key Rule:</strong> No <code>@BDH</code> = no dragon response. BDH stays quiet during normal GPT conversations until called!</p>
+        </div>
+    </div>
+
+    <script>
+        const messagesContainer = document.getElementById('messages');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        
+        // Conversation history to maintain context
+        let conversationHistory = [];
+        
+        const templateLibrary = {
+            style_transfer: {
+                label: 'Neon Style Transfer',
+                userMessage: "Let's teach BDH to rewrite a sentence with neon-soaked cyberpunk vibes.",
+                successHint: 'BDH should paint the scene with neon grit and cyberpunk vocabulary.'
+            },
+            summary: {
+                label: 'Flash Summary',
+                userMessage: 'Teach BDH to compress a short passage into one crisp sentence.',
+                successHint: 'BDH should return one sentence that preserves the core idea.'
+            },
+            data_extraction: {
+                label: 'Signal Extraction',
+                userMessage: 'Train BDH to pull key fields out of a status report.',
+                successHint: 'BDH should answer in key:value pairs for the requested fields.'
+            }
+        };
+
+        const ASSET_URLS = {
+            chatgpt: 'https://brown-traditional-sheep-998.mypinata.cloud/ipfs/bafkreibytn4xdxnlapnsujbstv7fbc43zdqpe433fbalm5ilov7ibmd3oy',
+            dragon: 'https://brown-traditional-sheep-998.mypinata.cloud/ipfs/bafkreigkcpqnrvoxuckstiwkedz4sbivmliajhxhk3cysrugmftsbizple'
+        };
+
+        function getAvatarMarkup(role) {
+            if (role === 'assistant') {
+                return `<img src="${ASSET_URLS.chatgpt}" alt="ChatGPT logo" class="avatar-image">`;
+            }
+            if (role === 'bdh') {
+                return `<img src="${ASSET_URLS.dragon}" alt="BDH dragon logo" class="avatar-image">`;
+            }
+            return '<span class="avatar-initial">YOU</span>';
+        }
+
+        function toggleInfoPanel(show) {
+            const overlay = document.getElementById('infoOverlay');
+            if (!overlay) return;
+            overlay.classList.toggle('active', !!show);
+        }
+
+        function handleOverlayClick(event) {
+            if (event.target.id === 'infoOverlay') {
+                toggleInfoPanel(false);
+            }
+        }
+
+        function createBdhLoading(roleLabel = 'BDH', subtitle = 'Processing...') {
+            const id = `loading-bdh-${Date.now()}`;
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = id;
+            loadingDiv.className = 'message message-bdh loading';
+            loadingDiv.innerHTML = `
+                <div class="message-avatar">${getAvatarMarkup('bdh')}</div>
+                <div class="message-content">
+                    <div class="message-role">${roleLabel}</div>
+                    <div class="message-text loading-subtitle">${subtitle}</div>
+                    <div class="loading">
+                        <span></span><span></span><span></span>
+                    </div>
+                </div>`;
+            messagesContainer.appendChild(loadingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            return id;
+        }
+
+        async function addBdhLearningTerminal(learningSteps) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message bdh';
+            messageDiv.innerHTML = `
+                <div class="message-avatar">${getAvatarMarkup('bdh')}</div>
+                <div class="message-content">
+                    <div class="message-role">BDH</div>
+                    <div class="message-text">
+                        <div class="bdh-learning-terminal" id="terminal-${Date.now()}"></div>
+                    </div>
+                </div>`;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+            const terminal = messageDiv.querySelector('.bdh-learning-terminal');
+            
+            // Calculate delay to spread 15 seconds across all lines
+            const totalLearningTime = 15000; // 15 seconds for learning display
+            const delayPerLine = totalLearningTime / learningSteps.length;
+            
+            // Add terminal lines one by one with calculated delay
+            for (let i = 0; i < learningSteps.length; i++) {
+                await new Promise(resolve => setTimeout(resolve, delayPerLine));
+                const line = document.createElement('div');
+                line.className = 'terminal-line';
+                
+                // Check if this line contains a progress bar
+                const hasProgressBar = learningSteps[i].includes('[████');
+                
+                if (hasProgressBar) {
+                    // Animate the progress bar
+                    const lineWithPlaceholder = learningSteps[i].replace(/\[████+\]\s*\d+%/, '<span class="progress-container"></span>');
+                    line.innerHTML = lineWithPlaceholder;
+                    terminal.appendChild(line);
+                    
+                    // Animate progress bar from 0% to 100%
+                    const progressContainer = line.querySelector('.progress-container');
+                    let progress = 0;
+                    const progressInterval = setInterval(() => {
+                        progress += 10;
+                        if (progress > 100) progress = 100;
+                        
+                        const filledBars = Math.floor((progress / 100) * 12);
+                        const emptyBars = 12 - filledBars;
+                        const bar = '[' + '█'.repeat(filledBars) + '░'.repeat(emptyBars) + '] ' + progress + '%';
+                        progressContainer.textContent = bar;
+                        
+                        if (progress >= 100) {
+                            clearInterval(progressInterval);
+                        }
+                    }, 80); // Update every 80ms for smooth animation (~1 second total)
+                } else {
+                    // Regular line without progress bar
+                    line.innerHTML = learningSteps[i];
+                    terminal.appendChild(line);
+                }
+                
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            }
+            
+            return messageDiv;
+        }
+
+        function addBdhFinalResponse(text) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message bdh';
+            messageDiv.innerHTML = `
+                <div class="message-avatar">${getAvatarMarkup('bdh')}</div>
+                <div class="message-content">
+                    <div class="message-role">BDH</div>
+                    <div class="message-text">
+                        <div class="bdh-final-response">${escapeHtml(text)}</div>
+                    </div>
+                </div>`;
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        async function runTemplate(templateId) {
+            const template = templateLibrary[templateId];
+            if (!template) {
+                addMessage('assistant', 'Unknown template requested.');
+                return;
+            }
+
+            addMessage('user', template.userMessage);
+            sendButton.disabled = true;
+            messageInput.disabled = true;
+
+            addLoading();
+            let lesson = null;
+            try {
+                const response = await fetch('/api/lesson', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ template_id: templateId })
+                });
+
+                const data = await response.json();
+                removeLoading();
+
+                if (data.success) {
+                    lesson = data.lesson;
+                    if (data.template && data.template.title) {
+                        addMessage('assistant', `Template • ${data.template.title}\n\n${lesson.gpt_message}`);
+                    } else {
+                        addMessage('assistant', lesson.gpt_message);
+                    }
+                    if (data.warning) {
+                        addMessage('assistant', `Note: ${data.warning}`);
+                    }
+                } else {
+                    addMessage('assistant', 'Lesson error: ' + (data.error || 'Unknown'));
+                    sendButton.disabled = false;
+                    messageInput.disabled = false;
+                    messageInput.focus();
+                    return;
+                }
+            } catch (error) {
+                removeLoading();
+                addMessage('assistant', 'Lesson connection error: ' + error.message);
+                sendButton.disabled = false;
+                messageInput.disabled = false;
+                messageInput.focus();
+                return;
+            }
+
+            if (!lesson) {
+                sendButton.disabled = false;
+                messageInput.disabled = false;
+                messageInput.focus();
+                return;
+            }
+
+            if (template.successHint) {
+                addMessage('assistant', 'Goal for BDH: ' + template.successHint);
+            }
+
+            const bdhLoadingId = createBdhLoading('BDH', 'Applying the lesson...');
+            activateNeuralNetwork('Applying lesson');
+
+            // Add realistic processing delay
+            await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 2000));
+
+            try {
+                const applyResp = await fetch('/api/lesson/apply', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        template_id: templateId,
+                        bdh_prompt: lesson.bdh_prompt
+                    })
+                });
+
+                const applyData = await applyResp.json();
+                const ld = document.getElementById(bdhLoadingId);
+                if (ld) ld.remove();
+
+                if (applyData.success) {
+                    const dragonOutput = (applyData.bdh_output || '').trim();
+                    addMessage('bdh', dragonOutput || '[BDH produced an empty response]');
+
+                    // Show comparison with target (no extra GPT message)
+                    if (applyData.expected_output && applyData.score !== null && applyData.score !== undefined) {
+                        const comparison = `Target: ${applyData.expected_output}\nPattern Alignment: ${applyData.score}%`;
+                        addMessage('assistant', comparison);
+                    }
+                } else {
+                    addMessage('bdh', 'BDH Error: ' + (applyData.error || 'Unknown'));
+                }
+            } catch (error) {
+                const ld = document.getElementById(bdhLoadingId);
+                if (ld) ld.remove();
+                addMessage('bdh', 'BDH connection error: ' + error.message);
+            } finally {
+                setTimeout(() => deactivateNeuralNetwork('Idle'), 800);
+                sendButton.disabled = false;
+                messageInput.disabled = false;
+                messageInput.focus();
+            }
+        }
+        // Neural Network Variables
+        let neurons = [];
+        let connections = [];
+        let canvas, ctx;
+        let animationFrame;
+        let isProcessing = false;
+        let pulsePhase = 0;
+        let signalParticles = [];
+        let learningConnections = []; // New connections being formed during learning
+
+        // Auto-resize textarea
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+            
+            // Highlight @mentions
+            const hasMention = /@(bdh|dragon|BDH|Dragon)\b/i.test(this.value);
+            if (hasMention) {
+                this.style.borderLeft = '3px solid rgba(34, 197, 94, 0.6)';
+            } else {
+                this.style.borderLeft = 'none';
+            }
+        });
+
+        // Send on Enter (Shift+Enter for new line)
+        messageInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Add message to UI
+        function addMessage(role, text) {
+            // Remove empty state
+            const emptyState = messagesContainer.querySelector('.empty-state');
+            if (emptyState) {
+                emptyState.remove();
+            }
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            
+            const avatarLabels = {
+                'user': 'You',
+                'assistant': 'ChatGPT',
+                'bdh': 'BDH'
+            };
+
+            messageDiv.innerHTML = `
+                <div class="message-avatar">${getAvatarMarkup(role)}</div>
+                <div class="message-content">
+                    <div class="message-role">${avatarLabels[role]}</div>
+                    <div class="message-text">${escapeHtml(text)}</div>
+                </div>
+            `;
+
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Add loading indicator
+        function addLoading() {
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'message assistant';
+            loadingDiv.id = 'loading';
+            loadingDiv.innerHTML = `
+                <div class="message-avatar">${getAvatarMarkup('assistant')}</div>
+                <div class="message-content">
+                    <div class="message-role">ChatGPT</div>
+                    <div class="loading">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            `;
+            messagesContainer.appendChild(loadingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function removeLoading() {
+            const loading = document.getElementById('loading');
+            if (loading) loading.remove();
+        }
+
+        // Send message (two-step: GPT then BDH)
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            // Add user message
+            addMessage('user', message);
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
+
+            // Disable input while processing
+            sendButton.disabled = true;
+            messageInput.disabled = true;
+
+            // Step 1: ask GPT (trainer)
+            let gptDelivered = false;
+            let gptResponse = '';
+            addLoading();
+            try {
+                // Add current message to history
+                conversationHistory.push({
+                    role: 'user',
+                    content: message
+                });
+                
+                const gptResp = await fetch('/api/gpt', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        message: message,
+                        history: conversationHistory
+                    })
+                });
+
+                const gdata = await gptResp.json();
+                removeLoading();
+                if (gdata.success) {
+                    gptResponse = gdata.gpt_response;
+                    addMessage('assistant', gptResponse);
+                    
+                    // Add GPT response to history
+                    conversationHistory.push({
+                        role: 'assistant',
+                        content: gptResponse
+                    });
+                    
+                    gptDelivered = true;
+                } else {
+                    addMessage('assistant', 'GPT Error: ' + (gdata.error || 'Unknown'));
+                }
+            } catch (err) {
+                removeLoading();
+                addMessage('assistant', 'GPT connection error: ' + err.message);
+            }
+
+            if (!gptDelivered) {
+                sendButton.disabled = false;
+                messageInput.disabled = false;
+                messageInput.focus();
+                return;
+            }
+
+            // Step 2: Check if BDH was @mentioned by user OR by GPT
+            // BDH ONLY activates when someone uses @BDH or @dragon
+            const userMentionedBDH = /@(bdh|dragon|BDH|Dragon)\b/i.test(message);
+            
+            // GPT should only trigger BDH if @BDH appears with actual instruction (not just explanation)
+            // Check if GPT is giving an actual command to BDH (followed by imperative verbs or specific instructions)
+            const gptMentionedBDH = /@(?:bdh|dragon|BDH|Dragon)\s+(?:access|retrieve|learn|understand|analyze|create|write|generate|calculate|process|fetch|get|find|make|do|try|attempt|query|extract|parse|build|train|practice|show|display|return|execute|run|call|invoke|handle|perform)/i.test(gptResponse);
+            
+            const shouldTriggerBDH = userMentionedBDH || gptMentionedBDH;
+            
+            if (!shouldTriggerBDH) {
+                // No @mention = no BDH response, just normal conversation
+                sendButton.disabled = false;
+                messageInput.disabled = false;
+                messageInput.focus();
+                return;
+            }
+
+            // Step 2b: Extract what BDH should process
+            let bdhPrompt = message;
+            
+            // If GPT @mentioned BDH, extract everything after @BDH
+            if (gptMentionedBDH) {
+                const gptMatch = gptResponse.match(/@(?:bdh|dragon|BDH|Dragon)\s+(.+?)(?:\.|$)/is);
+                if (gptMatch && gptMatch[1]) {
+                    bdhPrompt = gptMatch[1].trim();
+                }
+            }
+            // If user @mentioned BDH, extract everything after @BDH from user message
+            else if (userMentionedBDH) {
+                const userMatch = message.match(/@(?:bdh|dragon|BDH|Dragon)\s+(.+?)$/is);
+                if (userMatch && userMatch[1]) {
+                    bdhPrompt = userMatch[1].trim();
+                } else {
+                    // Just remove the @mention tag
+                    bdhPrompt = message.replace(/@(bdh|dragon|BDH|Dragon)\b/gi, '').trim();
+                }
+            }
+
+            // Trigger BDH generation and animate neural network while BDH 'learns'
+            activateNeuralNetwork('Learning');
+
+            // Check if this is an API/code learning task
+            const isApiTask = /\b(api|fetch|price|binance|solana|crypto|code)\b/i.test(bdhPrompt);
+            
+            // Determine learning steps based on task type (VERY TECHNICAL AND REALISTIC)
+            let learningSteps;
+            
+            if (isApiTask) {
+                learningSteps = [
+                    '<span class="terminal-prompt">[0.00s]</span> <span class="terminal-info">$ python bdh_core.py --mode=learning --task="api_integration"</span>',
+                    '<span class="terminal-prompt">[0.23s]</span> <span class="terminal-info">Loading transformer model (6-layer, 384-dim, 6-heads)...</span>',
+                    '<span class="terminal-prompt">[0.89s]</span> <span class="terminal-success">✓ Model loaded | Parameters: 2.4M | Memory: 9.6MB</span>',
+                    '<span class="terminal-prompt">[1.45s]</span> <span class="terminal-info">import requests; import json; from typing import Dict, Any</span>',
+                    '<span class="terminal-prompt">[2.12s]</span> <span class="terminal-info">Tokenizing API endpoint patterns... [████████████] 100%</span>',
+                    '<span class="terminal-prompt">[3.67s]</span> <span class="terminal-success">✓ Attention heads [0,2,4] activated for URL structure recognition</span>',
+                    '<span class="terminal-prompt">[4.89s]</span> <span class="terminal-info">def fetch_solana_price() -> Dict[str, Any]:</span>',
+                    '<span class="terminal-prompt">[5.34s]</span> <span class="terminal-info">    response = requests.get("https://api.binance.com/api/v3/ticker/price?symbol=SOLUSDT")</span>',
+                    '<span class="terminal-prompt">[6.78s]</span> <span class="terminal-info">    return json.loads(response.text)</span>',
+                    '<span class="terminal-prompt">[8.23s]</span> <span class="terminal-success">✓ HTTP request pattern embedded | Loss: 0.0023 | Accuracy: 99.8%</span>',
+                    '<span class="terminal-prompt">[9.91s]</span> <span class="terminal-info">Testing learned function... result = fetch_solana_price()</span>',
+                    '<span class="terminal-prompt">[11.45s]</span> <span class="terminal-success">✓ Test passed | Response: {"symbol":"SOLUSDT","price":"196.51"}</span>',
+                    '<span class="terminal-prompt">[12.67s]</span> <span class="terminal-info">Backpropagating through 6 layers... [████████████] 100%</span>',
+                    '<span class="terminal-prompt">[13.89s]</span> <span class="terminal-success">✓ Gradients computed | Weight updates: 14,823 parameters</span>',
+                    '<span class="terminal-prompt">[15.00s]</span> <span class="terminal-success">✓ API integration module saved to neural memory [COMPLETE]</span><span class="terminal-cursor"></span>'
+                ];
+            } else {
+                // Generic learning process - MUCH MORE TECHNICAL
+                const taskType = bdhPrompt.toLowerCase().includes('music') ? 'audio_theory' :
+                                bdhPrompt.toLowerCase().includes('poem') || bdhPrompt.toLowerCase().includes('write') ? 'text_generation' :
+                                bdhPrompt.toLowerCase().includes('math') || bdhPrompt.toLowerCase().includes('calculate') ? 'numerical_analysis' :
+                                'pattern_recognition';
+                
+                learningSteps = [
+                    '<span class="terminal-prompt">[0.00s]</span> <span class="terminal-info">$ python bdh_core.py --mode=training --task="' + taskType + '"</span>',
+                    '<span class="terminal-prompt">[0.34s]</span> <span class="terminal-info">Initializing 6-layer transformer (d_model=384, n_heads=6, d_ff=1536)</span>',
+                    '<span class="terminal-prompt">[1.12s]</span> <span class="terminal-success">✓ Neural architecture loaded | Params: 2,401,536 | FLOPs: 847M</span>',
+                    '<span class="terminal-prompt">[2.45s]</span> <span class="terminal-info">Tokenizing input sequence... tokens = encoder.encode(text)</span>',
+                    '<span class="terminal-prompt">[3.23s]</span> <span class="terminal-success">✓ Token embeddings: [batch=1, seq_len=47, dim=384]</span>',
+                    '<span class="terminal-prompt">[4.67s]</span> <span class="terminal-info">Forward pass through attention layers...</span>',
+                    '<span class="terminal-prompt">[5.89s]</span> <span class="terminal-info">  Layer 1: Q·K^T/√d_k → softmax → attention_weights @ V</span>',
+                    '<span class="terminal-prompt">[7.12s]</span> <span class="terminal-info">  Layer 3: Cross-attention score: 0.847 | Entropy: 2.31</span>',
+                    '<span class="terminal-prompt">[8.56s]</span> <span class="terminal-info">  Layer 6: Output logits computed | Top-5 confidence: [0.89, 0.76, 0.54, 0.32, 0.18]</span>',
+                    '<span class="terminal-prompt">[10.23s]</span> <span class="terminal-success">✓ Forward pass complete | Loss: 0.0147 (↓ from 0.3421)</span>',
+                    '<span class="terminal-prompt">[11.67s]</span> <span class="terminal-info">Backpropagation: Computing ∂L/∂θ for 2.4M parameters...</span>',
+                    '<span class="terminal-prompt">[12.89s]</span> <span class="terminal-info">Gradient descent: θ_new = θ - α∇L | Learning rate α=0.001</span>',
+                    '<span class="terminal-prompt">[13.91s]</span> <span class="terminal-success">✓ Weight matrices updated | Grad norm: 0.0234 | Convergence: 94.7%</span>',
+                    '<span class="terminal-prompt">[14.78s]</span> <span class="terminal-info">Saving checkpoint to ./models/bdh_trained.pt...</span>',
+                    '<span class="terminal-prompt">[15.00s]</span> <span class="terminal-success">✓ Training complete | Model ready for inference [SAVED]</span><span class="terminal-cursor"></span>'
+                ];
+            }
+            
+            // ALWAYS show learning terminal first
+            await addBdhLearningTerminal(learningSteps);
+            
+            // Show "thinking" indicator for 10 seconds
+            const thinkingDiv = document.createElement('div');
+            thinkingDiv.className = 'message bdh';
+            thinkingDiv.innerHTML = `
+                <div class="message-avatar">${getAvatarMarkup('bdh')}</div>
+                <div class="message-content">
+                    <div class="message-role">BDH</div>
+                    <div class="message-text" style="color: #86efac; font-style: italic;">
+                        <span class="thinking-dots">Formulating response</span><span class="terminal-cursor"></span>
+                    </div>
+                </div>`;
+            messagesContainer.appendChild(thinkingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // Add 10 second delay for "thinking" and formulating response
+            await new Promise(resolve => setTimeout(resolve, 10000));
+            
+            // Remove thinking indicator
+            thinkingDiv.remove();
+            
+            // Now fetch the actual response
+            try {
+                const genResp = await fetch('/api/simulate-bdh', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        prompt: bdhPrompt,
+                        guidance: gptResponse
+                    })
+                });
+
+                const gendata = await genResp.json();
+
+                if (gendata.success) {
+                    const dragonText = (gendata.bdh_response || '').trim();
+                    addBdhFinalResponse(dragonText || '[BDH produced an empty response]');
+                } else {
+                    addBdhFinalResponse('Error: ' + (gendata.error || 'Unknown'));
+                }
+            } catch (err) {
+                addBdhFinalResponse('Connection error: ' + err.message);
+            }
+            
+            setTimeout(() => deactivateNeuralNetwork('Idle'), 800);
+            sendButton.disabled = false;
+            messageInput.disabled = false;
+            messageInput.focus();
+        }
+
+        // Initialize
+        window.onload = function() {
+            messageInput.focus();
+            initNeuralNetwork();
+            startUptimeCounter();
+            startDynamicStats();
+        };
+
+        // Dynamic Stats Animation
+        function startDynamicStats() {
+            // Animate FLOPS
+            setInterval(() => {
+                if (isProcessing) {
+                    const flops = (0.8 + Math.random() * 0.4).toFixed(2);
+                    document.getElementById('flops').textContent = `${flops} GF/s`;
+                } else {
+                    document.getElementById('flops').textContent = '0.00 GF/s';
+                }
+            }, 150);
+
+            // Animate Throughput
+            setInterval(() => {
+                if (isProcessing) {
+                    const throughput = Math.floor(45 + Math.random() * 30);
+                    document.getElementById('throughput').textContent = `${throughput} tok/s`;
+                } else {
+                    document.getElementById('throughput').textContent = '0 tok/s';
+                }
+            }, 200);
+
+            // Animate Latency
+            setInterval(() => {
+                if (isProcessing) {
+                    const latency = Math.floor(80 + Math.random() * 40);
+                    document.getElementById('latency').textContent = `${latency}ms`;
+                } else {
+                    const idleLatency = Math.floor(5 + Math.random() * 10);
+                    document.getElementById('latency').textContent = `${idleLatency}ms`;
+                }
+            }, 100);
+
+            // Animate Loss (slowly decreasing when processing)
+            let currentLoss = 0.0234;
+            setInterval(() => {
+                if (isProcessing) {
+                    currentLoss = Math.max(0.0001, currentLoss - Math.random() * 0.0001);
+                    document.getElementById('loss').textContent = currentLoss.toFixed(4);
+                } else {
+                    // Slight random variation when idle
+                    currentLoss += (Math.random() - 0.5) * 0.00001;
+                    currentLoss = Math.max(0.0001, Math.min(0.1, currentLoss));
+                    document.getElementById('loss').textContent = currentLoss.toFixed(4);
+                }
+            }, 500);
+
+            // Animate Gradient Norm
+            setInterval(() => {
+                if (isProcessing) {
+                    const gradNorm = (0.008 + Math.random() * 0.012).toFixed(3);
+                    document.getElementById('gradNorm').textContent = gradNorm;
+                } else {
+                    document.getElementById('gradNorm').textContent = '0.000';
+                }
+            }, 300);
+
+            // Animate Temperature
+            let baseTemp = 48;
+            setInterval(() => {
+                if (isProcessing) {
+                    baseTemp = Math.min(72, baseTemp + Math.random() * 2);
+                } else {
+                    baseTemp = Math.max(45, baseTemp - Math.random() * 0.5);
+                }
+                document.getElementById('temperature').textContent = `${Math.floor(baseTemp)}°C`;
+            }, 1000);
+
+            // Animate Epoch counter
+            let epochCount = 0;
+            setInterval(() => {
+                if (isProcessing) {
+                    epochCount += Math.floor(Math.random() * 3);
+                    document.getElementById('epoch').textContent = epochCount.toString();
+                }
+            }, 2000);
+        }
+
+        // Uptime counter
+        let startTime = Date.now();
+        function startUptimeCounter() {
+            setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                const hours = Math.floor(elapsed / 3600000);
+                const minutes = Math.floor((elapsed % 3600000) / 60000);
+                const seconds = Math.floor((elapsed % 60000) / 1000);
+                document.getElementById('uptime').textContent = 
+                    `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        // Neural Network Initialization
+        function initNeuralNetwork() {
+            canvas = document.getElementById('neuralCanvas');
+            if (!canvas) return;
+            
+            ctx = canvas.getContext('2d');
+            canvas.width = canvas.offsetWidth * window.devicePixelRatio;
+            canvas.height = canvas.offsetHeight * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+            
+            const width = canvas.offsetWidth;
+            const height = canvas.offsetHeight;
+            
+            // Create neurons in layers
+            const layers = [6, 8, 8, 6]; // Input, hidden, hidden, output
+            const spacing = width / (layers.length + 1);
+            
+            neurons = [];
+            for (let l = 0; l < layers.length; l++) {
+                const layerNeurons = layers[l];
+                const verticalSpacing = height / (layerNeurons + 1);
+                
+                for (let n = 0; n < layerNeurons; n++) {
+                    neurons.push({
+                        x: spacing * (l + 1),
+                        y: verticalSpacing * (n + 1),
+                        baseX: spacing * (l + 1),  // Store original position
+                        baseY: verticalSpacing * (n + 1),
+                        layer: l,
+                        activity: 0,
+                        targetActivity: 0,
+                        driftAngle: Math.random() * Math.PI * 2,  // Random drift direction
+                        driftSpeed: 0.3 + Math.random() * 0.5     // Drift speed
+                    });
+                }
+            }
+            
+            // Create connections between layers
+            connections = [];
+            let neuronIndex = 0;
+            for (let l = 0; l < layers.length - 1; l++) {
+                const currentLayerSize = layers[l];
+                const nextLayerSize = layers[l + 1];
+                const currentLayerStart = neuronIndex;
+                const nextLayerStart = neuronIndex + currentLayerSize;
+                
+                for (let i = 0; i < currentLayerSize; i++) {
+                    for (let j = 0; j < nextLayerSize; j++) {
+                        connections.push({
+                            from: currentLayerStart + i,
+                            to: nextLayerStart + j,
+                            strength: Math.random() * 0.5 + 0.5,
+                            phase: Math.random() * Math.PI * 2
+                        });
+                    }
+                }
+                neuronIndex += currentLayerSize;
+            }
+            
+            animateNeuralNetwork();
+        }
+
+        function animateNeuralNetwork() {
+            const width = canvas.offsetWidth;
+            const height = canvas.offsetHeight;
+            
+            // Clear canvas with slight trail effect
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+            ctx.fillRect(0, 0, width, height);
+
+            pulsePhase += isProcessing ? 0.08 : 0.02;
+            if (pulsePhase > Math.PI * 2) {
+                pulsePhase -= Math.PI * 2;
+            }
+            
+            // Update neuron activities and positions (drift)
+            neurons.forEach((neuron, index) => {
+                neuron.activity += (neuron.targetActivity - neuron.activity) * 0.08;
+                if (!isProcessing && neuron.activity > 0) {
+                    neuron.targetActivity *= 0.92;
+                }
+                
+                // Make neurons drift slowly around their base position
+                neuron.driftAngle += (Math.random() - 0.5) * 0.1;
+                const driftRadius = isProcessing ? 8 : 4; // Drift more when processing
+                neuron.x = neuron.baseX + Math.cos(neuron.driftAngle) * driftRadius;
+                neuron.y = neuron.baseY + Math.sin(neuron.driftAngle) * driftRadius;
+            });
+            
+            // Create signal particles when processing
+            if (isProcessing && Math.random() < 0.3) {
+                const conn = connections[Math.floor(Math.random() * connections.length)];
+                signalParticles.push({
+                    connection: conn,
+                    progress: 0,
+                    speed: 0.015 + Math.random() * 0.025,
+                    brightness: 0.8 + Math.random() * 0.2
+                });
+            }
+            
+            // Draw base connections (always present, subtle)
+            connections.forEach(conn => {
+                const from = neurons[conn.from];
+                const to = neurons[conn.to];
+                const baseActivity = Math.max(from.activity, to.activity) * 0.3;
+                
+                if (baseActivity > 0.05) {
+                    ctx.beginPath();
+                    ctx.moveTo(from.x, from.y);
+                    ctx.lineTo(to.x, to.y);
+                    ctx.strokeStyle = `rgba(100, 100, 100, ${baseActivity * 0.3})`;
+                    ctx.lineWidth = 0.5;
+                    ctx.stroke();
+                }
+            });
+            
+            // Update and draw learning connections (bright green, forming during processing)
+            if (isProcessing) {
+                // Create new learning connections
+                if (Math.random() < 0.15) {
+                    const fromIdx = Math.floor(Math.random() * neurons.length);
+                    const toIdx = Math.floor(Math.random() * neurons.length);
+                    if (fromIdx !== toIdx) {
+                        learningConnections.push({
+                            from: fromIdx,
+                            to: toIdx,
+                            age: 0,
+                            maxAge: 60 + Math.random() * 120,
+                            thickness: 1 + Math.random() * 2
+                        });
+                    }
+                }
+            }
+            
+            // Draw and update learning connections
+            learningConnections = learningConnections.filter(lc => {
+                lc.age++;
+                if (lc.age > lc.maxAge) return false;
+                
+                const from = neurons[lc.from];
+                const to = neurons[lc.to];
+                const lifeProgress = lc.age / lc.maxAge;
+                const opacity = Math.sin(lifeProgress * Math.PI); // Fade in and out
+                
+                // Create gradient for learning connection
+                const gradient = ctx.createLinearGradient(from.x, from.y, to.x, to.y);
+                gradient.addColorStop(0, `rgba(34, 197, 94, ${opacity * 0.8})`);
+                gradient.addColorStop(0.5, `rgba(134, 239, 172, ${opacity})`);
+                gradient.addColorStop(1, `rgba(34, 197, 94, ${opacity * 0.8})`);
+                
+                ctx.beginPath();
+                ctx.moveTo(from.x, from.y);
+                ctx.lineTo(to.x, to.y);
+                ctx.strokeStyle = gradient;
+                ctx.lineWidth = lc.thickness * opacity;
+                ctx.shadowBlur = 12 * opacity;
+                ctx.shadowColor = 'rgba(34, 197, 94, 0.9)';
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+                
+                return true;
+            });
+            
+            // Draw and update signal particles
+            signalParticles = signalParticles.filter(particle => {
+                particle.progress += particle.speed;
+                if (particle.progress > 1) return false;
+                
+                const conn = particle.connection;
+                const from = neurons[conn.from];
+                const to = neurons[conn.to];
+                const x = from.x + (to.x - from.x) * particle.progress;
+                const y = from.y + (to.y - from.y) * particle.progress;
+                
+                // Draw glowing particle
+                ctx.beginPath();
+                ctx.arc(x, y, 3, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(134, 239, 172, ${particle.brightness})`;
+                ctx.shadowBlur = 12;
+                ctx.shadowColor = 'rgba(74, 222, 128, 1)';
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                
+                // Add trailing glow
+                ctx.beginPath();
+                ctx.arc(x, y, 6, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(34, 197, 94, ${particle.brightness * 0.3})`;
+                ctx.fill();
+                
+                return true;
+            });
+            
+            // Draw neurons as white dots with green glow when active
+            neurons.forEach(neuron => {
+                const baseSize = 3;
+                const activeSize = baseSize + neuron.activity * 5;
+                
+                // Outer glow when active
+                if (neuron.activity > 0.2 || isProcessing) {
+                    ctx.beginPath();
+                    ctx.arc(neuron.x, neuron.y, activeSize + 4, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(34, 197, 94, ${neuron.activity * 0.3})`;
+                    ctx.fill();
+                }
+                
+                // Main neuron body
+                ctx.beginPath();
+                ctx.arc(neuron.x, neuron.y, activeSize, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${0.7 + neuron.activity * 0.3})`;
+                ctx.fill();
+                
+                // Inner bright core when very active
+                if (neuron.activity > 0.5 || isProcessing) {
+                    ctx.beginPath();
+                    ctx.arc(neuron.x, neuron.y, activeSize * 0.5, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(134, 239, 172, ${neuron.activity})`;
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = 'rgba(74, 222, 128, 0.8)';
+                    ctx.fill();
+                    ctx.shadowBlur = 0;
+                }
+            });
+            
+            // Update stats
+            const activeCount = neurons.filter(n => n.activity > 0.3).length;
+            document.getElementById('activeNeurons').textContent = activeCount;
+            document.getElementById('firingRate').textContent = Math.round((activeCount / neurons.length) * 100) + '%';
+            
+            animationFrame = requestAnimationFrame(animateNeuralNetwork);
+        }
+
+        function activateNeuralNetwork(statusText = 'Processing') {
+            isProcessing = true;
+            document.getElementById('activityIndicator').classList.add('active');
+            document.getElementById('statusValue').textContent = statusText;
+            
+            // Add active class to stat values for glow effect
+            const statValues = document.querySelectorAll('.stat-value');
+            statValues.forEach(stat => stat.classList.add('active'));
+            
+            // Activate neurons in waves
+            neurons.forEach((neuron, index) => {
+                setTimeout(() => {
+                    neuron.targetActivity = Math.random() * 0.8 + 0.2;
+                }, index * 30);
+            });
+        }
+
+        function deactivateNeuralNetwork(statusText = 'Idle') {
+            isProcessing = false;
+            document.getElementById('activityIndicator').classList.remove('active');
+            document.getElementById('statusValue').textContent = statusText;
+            
+            // Remove active class from stat values
+            const statValues = document.querySelectorAll('.stat-value');
+            statValues.forEach(stat => stat.classList.remove('active'));
+            
+            neurons.forEach(neuron => {
+                neuron.targetActivity = 0;
+            });
+        }
+
+        // Page Loader Animation
+        function initPageLoader() {
+            const loader = document.getElementById('pageLoader');
+            const loaderBar = document.getElementById('loaderBar');
+            const loaderPercentage = document.getElementById('loaderPercentage');
+            const loaderStatus = document.getElementById('loaderStatus');
+
+            const loadingMessages = [
+                'Initializing neural pathways...',
+                'Loading transformer layers...',
+                'Allocating memory buffers...',
+                'Establishing API connections...',
+                'Calibrating attention heads...',
+                'Finalizing initialization...'
+            ];
+
+            let progress = 0;
+            let messageIndex = 0;
+
+            const interval = setInterval(() => {
+                progress += Math.random() * 15 + 5; // Random increment between 5-20
+                if (progress > 100) progress = 100;
+
+                loaderBar.style.width = progress + '%';
+                loaderPercentage.textContent = Math.floor(progress) + '%';
+
+                // Update status message every ~20% progress
+                if (progress > (messageIndex + 1) * 16 && messageIndex < loadingMessages.length - 1) {
+                    messageIndex++;
+                    loaderStatus.textContent = loadingMessages[messageIndex];
+                }
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    loaderStatus.textContent = '✓ Initialization complete';
+                    
+                    // Hide loader after brief delay
+                    setTimeout(() => {
+                        loader.classList.add('hidden');
+                    }, 500);
+                }
+            }, 150); // Update every 150ms
+        }
+
+        // Start loader animation when page loads
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initPageLoader);
+        } else {
+            initPageLoader();
+        }
+    </script>
+</body>
+</html>

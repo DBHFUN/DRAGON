@@ -1,0 +1,8 @@
+torch
+numpy
+requests
+flask
+flask-cors
+gunicorn
+python-dotenv
+openai
